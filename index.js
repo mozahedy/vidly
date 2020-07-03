@@ -1,7 +1,27 @@
+const config = require('config');
+const morgan = require('morgan');
+const helmet = require('helmet');
 const Joi = require('joi');
 const express = require('express');
+const logger = require('./logger');
+
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(express.static('public'));
+app.use(helmet());
+app.use(logger);
+
+// Configuration
+console.log("app name: "+config.get('name'));
+console.log("mail server: "+config.get('mail.host'));
+console.log("mail pass: "+config.get('mail.a'));
+
+// checks the environment, if dev, then morgan is enabled
+if(app.get('env') === 'development'){
+    app.use(morgan('tiny'));
+    console.log('Morgan is enabled...');
+}
 
 const movies = [
     {id: 1, name: "The Shawshank Redumption"},

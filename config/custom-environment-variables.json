@@ -1,5 +1,5 @@
 {
-    "mail": {
-        "a": "vildly_password"
+    "mails": {
+        "password": "vildly_password"
     }
 }

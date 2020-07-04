@@ -1,99 +1,32 @@
+const debug = require('debug')('app:startup');
 const config = require('config');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const Joi = require('joi');
 const express = require('express');
-const logger = require('./logger');
+const logger = require('./middleware/logger');
+const movies = require('./routes/movies');
+const home = require('./routes/home');
 
 const app = express();
+app.set('view engine', 'pug');
+//app.set('views', './views');
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static('public'));
 app.use(helmet());
 app.use(logger);
+app.use('/api/genres', movies);
+app.use('/', home);
 
 // Configuration
-console.log("app name: "+config.get('name'));
-console.log("mail server: "+config.get('mail.host'));
-console.log("mail pass: "+config.get('mail.a'));
+//console.log("app name: "+config.get('name'));
+//console.log("mail server: "+config.get('mail.host'));
 
 // checks the environment, if dev, then morgan is enabled
 if(app.get('env') === 'development'){
     app.use(morgan('tiny'));
-    console.log('Morgan is enabled...');
-}
-
-const movies = [
-    {id: 1, name: "The Shawshank Redumption"},
-    {id: 2, name: "Inception"},
-    {id: 3, name: "The dark Knight"},
-    {id: 4, name: "Mad Max"}
-];
-
-app.get('/', (req, res)=>{
-    res.send('Welcome to vidly movie rental application');
-});
-
-//display all movies
-app.get('/api/genres', (req, res)=>{
-    res.send(movies);
-});
-
- //Find movie
-app.get('/api/genres/:id', (req, res)=>{
-    const movie = searchMove(req.params.id);
-    if(!movie)
-        return res.status(404).send('The movie was not found');
-});
-
-//update a movie
-app.put('/api/genres/:id', (req, res) => {
-    const movie = searchMove(req.params.id);
-    if(!movie)
-        return res.status(404).send('The movie was not found.');
-    
-    const { error } = validateData(req.body);
-    if(error)
-        res.status(404).send(error.details[0].message);
-
-    movie.name = req.body.name;
-    const movies1 = movies.map((m) => {
-        if(m.id === parseInt(req.params.id))
-            return m = movie;
-        else
-            return m;
-    });
-    res.send(movies1);
-});
-
-// add new movie
-app.post('/api/genres/', (req, res)=>{
-    const { error } = validateData(req.body);
-    if(error)
-        res.status(404).send(error.details[0].message);
-    movies.push({id: movies.length+1, name: req.body.name});
-    res.send(movies);
-});
-
-// remove a movie
-app.delete('/api/genres/:id', (req, res)=>{
-    const movie = searchMove(req.params.id);
-    if(!movie)
-        return res.status(404).send('The movie was not found.');
-    movies.splice(parseInt(req.params.id)-1, 1);
-    res.send(movies);
-});
-
-// search movie by id
-function searchMove(id){
-    return movie = movies.find( m => m.id === parseInt(id));
-}
-// Validate input movie
-function validateData(movie){
-    const schema = {
-        name: Joi.string().min(3).required()
-    };
-    return Joi.validate(movie, schema);
+    debug('Morgan is enabled...');
 }
 
 const port = process.env.PORT || 3000;

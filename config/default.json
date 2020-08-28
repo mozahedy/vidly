@@ -1,3 +1,4 @@
 {
-    "name": "Vildly Movie Rental"
+    "name": "Vildly Movie Rental",
+    "jwtPrivateKey": ""
 }

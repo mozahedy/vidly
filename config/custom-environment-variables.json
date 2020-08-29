@@ -1,6 +1,0 @@
-{
-    "mails": {
-        "password": "vildly_password"
-    },
-    "jwtPrivateKey": "vidly_jwtPrivateKey"
-}

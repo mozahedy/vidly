@@ -1,5 +1,9 @@
 require('express-async-errors');
+const appRoot = require('app-root-path');
+require('winston-mongodb');
+//const winston = require('./config/winston');
 const winston = require('winston');
+const morgan = require('morgan');
 const error = require('./middleware/error');
 const config = require('config');
 const Joi = require('joi');
@@ -14,9 +18,14 @@ const auth = require('./routes/auth');
 const express = require('express');
 const app = express();
 
-//winston.add(winston.transports.File, { filename: 'logfile.log'});
+winston.add(new winston.transports.File({filename: `${appRoot}/logs/app.log`}));
+winston.add(new winston.transports.MongoDB({
+  db: 'mongodb://localhost/vidly',
+  level: 'info'
+}));
 
-if(!config.get('jwtPrivateKey')) {
+
+if (!config.get('jwtPrivateKey')) {
   console.log('Fatal Error: jwtPrivateKey is not defined.');
   process.exit(1);
 }
@@ -31,6 +40,7 @@ app.use('/api/movies', movies);
 app.use('/api/rentals', rentals);
 app.use('/api/users', users);
 app.use('/api/auth/', auth);
+//app.use(morgan('combined', {stream: winston.stream}));
 app.use(error);
 
 const port = process.env.PORT || 3000;
